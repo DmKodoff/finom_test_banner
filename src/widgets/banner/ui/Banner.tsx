@@ -4,7 +4,7 @@ import { Button } from '@/shared/ui/Button'
 import { Title } from '@/shared/ui/Title/Title'
 import { Text } from '@/shared/ui/Text'
 import CheckIcon from '@/widgets/banner/assets/icons/check-solid.svg?react'
-import coinsImage from '@/widgets/banner/assets/background/coins-currency.png'
+import BackgroundImage from './BackgroundImage'
 
 interface BannerProps {
   isOpen?: boolean
@@ -20,6 +20,7 @@ const FEATURES_LIST = [
 const Banner = ({ isOpen = true, onClose = () => {} }: BannerProps) => {
   const [isApplying, setIsApplying] = useState(false)
   const applyTimeoutRef = useRef<number | null>(null)
+  const bannerContainerRef = useRef<HTMLDivElement>(null)
 
   const handleApplyClick = () => {
     if (isApplying) {
@@ -47,9 +48,12 @@ const Banner = ({ isOpen = true, onClose = () => {} }: BannerProps) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className='w-[89.33vw] md:w-[700px] md:max-w-[700px] h-[auto] md:h-[376px] border-2 border-border-modal rounded-[12px]'
+      className='w-[89.33vw] md:w-[700px] md:max-w-[700px] h-[auto] md:h-[376px] border-[3px] border-border-modal rounded-[12px]'
     >
-      <div className='relative p-5 md:py-8 md:px-11 h-full flex flex-col'>
+      <div
+        ref={bannerContainerRef}
+        className='relative p-5 md:py-8 md:px-11 h-full flex flex-col'
+      >
         <Title className='mb-5 md:mb-8 w-full text-[20px] leading-6 tracking-normal md:text-[24px] md:leading-[28px]'>
           Get the Business Funding You Need
         </Title>
@@ -108,14 +112,7 @@ const Banner = ({ isOpen = true, onClose = () => {} }: BannerProps) => {
           </Button>
         </div>
 
-        <div className='hidden md:block absolute right-0 bottom-0  pointer-events-none z-0 translate-y-10'>
-          <img
-            src={coinsImage}
-            alt=''
-            className='max-w-[300px] max-h-[300px] w-auto h-auto object-contain'
-            aria-hidden='true'
-          />
-        </div>
+        <BackgroundImage bannerContainerRef={bannerContainerRef} />
       </div>
     </Modal>
   )
