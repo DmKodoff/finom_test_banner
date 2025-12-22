@@ -2,3 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Background colors */
+  --bg-app: #f3f2f7;
+  --bg-content: #ffffff;
+
+  /* Text colors */
+  --text-default: #0b002e;
+  --text-light: #0b002ea3;
+
+  /* Button colors */
+  --btn-primary-bg: #ff4c5c;
+  --btn-primary-color: #ffffff;
+
+  /* Border colors */
+  --border-modal: #6666ff;
+
+  /* Icon colors */
+  --text-success: #3ab15e;
+
+  /* Font families */
+  --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+    'Helvetica Neue', sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-default);
+    font-family: var(--font-sans);
+  }
+}

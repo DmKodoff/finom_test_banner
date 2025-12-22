@@ -1,4 +1,5 @@
-export { Modal } from './Modal';
-export { Button } from './Button';
-export { Link } from './Link';
-
+export { Modal } from './Modal'
+export { Button } from './Button'
+export { Title } from './Title'
+export { Text } from './Text'
+export { ErrorBoundary } from './ErrorBoundary'

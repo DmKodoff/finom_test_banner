@@ -1,4 +1,7 @@
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useEffect, useRef } from 'react'
+import { cn } from '@/shared/lib/utils'
+import { Button } from '@/shared/ui/Button'
+import CloseIcon from './assets/icons/close.svg?react'
 
 interface ModalProps {
   isOpen: boolean
@@ -7,49 +10,44 @@ interface ModalProps {
   className?: string
 }
 
-let openModalsCount = 0
-let originalBodyOverflow = ''
+// Shared state for managing multiple modals
+const modalState = {
+  count: { current: 0 },
+  originalOverflow: { current: '' },
+}
 
 const Modal = ({ isOpen, onClose, children, className = '' }: ModalProps) => {
+  const wasOpenRef = useRef(false)
+
   useEffect(() => {
-    if (!isOpen) {
-      return
-    }
+    // Handle modal opening
+    if (isOpen && !wasOpenRef.current) {
+      wasOpenRef.current = true
 
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose()
+      if (modalState.count.current === 0) {
+        modalState.originalOverflow.current = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
       }
+
+      modalState.count.current++
     }
 
-    if (openModalsCount === 0) {
-      originalBodyOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-    }
-
-    openModalsCount++
-    document.addEventListener('keydown', handleEscape)
-
+    // Handle modal closing - cleanup always runs
+    // This handles both: modal closing (isOpen becomes false) and component unmounting
     return () => {
-      document.removeEventListener('keydown', handleEscape)
-      openModalsCount--
+      if (wasOpenRef.current) {
+        wasOpenRef.current = false
+        modalState.count.current--
 
-      if (openModalsCount === 0) {
-        document.body.style.overflow = originalBodyOverflow
+        if (modalState.count.current === 0) {
+          document.body.style.overflow = modalState.originalOverflow.current
+        }
       }
     }
-  }, [isOpen, onClose])
+  }, [isOpen])
 
   if (!isOpen) {
     return null
-  }
-
-  const handleBackdropClick = () => {
-    onClose()
-  }
-
-  const handleModalContentClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    event.stopPropagation()
   }
 
   return (
@@ -60,14 +58,33 @@ const Modal = ({ isOpen, onClose, children, className = '' }: ModalProps) => {
       aria-label='Modal'
     >
       <div
-        className='fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity'
-        onClick={handleBackdropClick}
+        className='fixed inset-0 backdrop-blur-sm transition-opacity'
         aria-hidden='true'
       />
       <div
-        className={`relative z-10 bg-white rounded-lg border-2 border-purple-500 shadow-xl max-w-full max-h-[90vh] overflow-auto ${className}`}
-        onClick={handleModalContentClick}
+        className={cn(
+          'relative z-10 rounded-lg bg-bg-content overflow-hidden',
+          className
+        )}
+        onClick={(e) => e.stopPropagation()}
       >
+        <Button
+          type='button'
+          variant='ghost'
+          size='icon'
+          onClick={onClose}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              onClose()
+            }
+          }}
+          className='absolute top-3 right-2 md:right-3  w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-100 hover:bg-transparent text-text-default transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-border-modal focus:ring-offset-2 z-20'
+          aria-label='Close modal'
+          tabIndex={0}
+        >
+          <CloseIcon className='w-5 h-5 md:w-6 md:h-6' aria-hidden='true' />
+        </Button>
         {children}
       </div>
     </div>
