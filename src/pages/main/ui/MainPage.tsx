@@ -14,7 +14,7 @@ const MainPage = () => {
   }
 
   const handleBannerApply = () => {
-    console.log('Application submitted')
+    alert('Application submitted')
   }
 
   return (
