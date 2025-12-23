@@ -3,9 +3,16 @@ import ReactDOM from 'react-dom/client'
 import App from './app/App.tsx'
 import './index.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root')
+
+if (!rootElement) {
+  throw new Error(
+    'Failed to find the root element. Make sure there is a div with id="root" in your HTML file.'
+  )
+}
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
+  </React.StrictMode>
 )
-

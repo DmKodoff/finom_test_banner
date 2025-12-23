@@ -97,8 +97,6 @@ Main banner component (`src/widgets/banner/ui/Banner.tsx`) displayed as a modal 
 Reusable modal component (`src/shared/ui/Modal/Modal.tsx`) with support for:
 
 - Open/close functionality
-- Click on overlay to close
-- Close on Escape key
 - Focus management and accessibility
 
 ### Button

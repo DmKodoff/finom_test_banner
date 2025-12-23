@@ -80,6 +80,7 @@ export interface ButtonPropsAsAnchor
   variant?: ButtonVariant
   size?: ButtonSize
   loading?: boolean
+  disabled?: boolean
   href: string
   target?: string
   rel?: string
@@ -95,6 +96,40 @@ export interface ButtonPropsAsAnchor
  */
 export type ButtonProps = ButtonPropsAsButton | ButtonPropsAsAnchor
 
+const isValidUrl = (url: string): boolean => {
+  if (url.startsWith('/') || url.startsWith('#') || url.startsWith('?')) {
+    return true
+  }
+
+  const ALLOWED_PROTOCOLS = ['http:', 'https:', 'mailto:', 'tel:'] as const
+
+  const DANGEROUS_PROTOCOLS = [
+    'javascript:',
+    'data:',
+    'vbscript:',
+    'file:',
+    'about:',
+  ] as const
+
+  const urlLower = url.toLowerCase().trim()
+
+  for (const dangerous of DANGEROUS_PROTOCOLS) {
+    if (urlLower.startsWith(dangerous)) {
+      return false
+    }
+  }
+
+  try {
+    const parsedUrl = new URL(url, 'http://localhost')
+
+    return ALLOWED_PROTOCOLS.includes(
+      parsedUrl.protocol as (typeof ALLOWED_PROTOCOLS)[number]
+    )
+  } catch {
+    return false
+  }
+}
+
 const Button = React.forwardRef<
   HTMLButtonElement | HTMLAnchorElement,
   ButtonProps
@@ -103,22 +138,59 @@ const Button = React.forwardRef<
     { className, variant, size, href, target, rel, loading = false, ...props },
     ref
   ) => {
+    const buttonClassName = cn(buttonVariants({ variant, size }), className)
+    const commonProps = {
+      className: buttonClassName,
+    }
+
+    const renderContent = (children: React.ReactNode) => (
+      <>
+        {loading && <ButtonLoader className='mr-2' />}
+        {children}
+      </>
+    )
+
     if (href) {
+      const isUrlValid = isValidUrl(href)
+
+      if (!isUrlValid) {
+        if (import.meta.env.DEV) {
+          console.warn(
+            `Button: Invalid or unsafe URL "${href}". Only http, https, and relative paths are allowed.`
+          )
+        }
+
+        const buttonProps =
+          props as React.ButtonHTMLAttributes<HTMLButtonElement>
+        const { children, disabled, ...restButtonProps } = buttonProps
+
+        return (
+          <button
+            {...commonProps}
+            ref={ref as React.ForwardedRef<HTMLButtonElement>}
+            disabled={loading || disabled}
+            aria-busy={loading}
+            aria-live={loading ? 'polite' : undefined}
+            {...restButtonProps}
+          >
+            {renderContent(children)}
+          </button>
+        )
+      }
+
       const anchorProps = props as React.AnchorHTMLAttributes<HTMLAnchorElement>
       const { children, ...restAnchorProps } = anchorProps
 
       return (
         <a
+          {...commonProps}
           href={href}
           target={target}
           rel={rel}
-          className={cn(buttonVariants({ variant, size, className }))}
           ref={ref as React.ForwardedRef<HTMLAnchorElement>}
-          aria-busy={loading}
           {...restAnchorProps}
         >
-          {loading && <ButtonLoader className='mr-2' />}
-          {children}
+          {renderContent(children)}
         </a>
       )
     }
@@ -128,14 +200,14 @@ const Button = React.forwardRef<
 
     return (
       <button
-        className={cn(buttonVariants({ variant, size, className }))}
+        {...commonProps}
         ref={ref as React.ForwardedRef<HTMLButtonElement>}
         disabled={loading || disabled}
         aria-busy={loading}
+        aria-live={loading ? 'polite' : undefined}
         {...restButtonProps}
       >
-        {loading && <ButtonLoader className='mr-2' />}
-        {children}
+        {renderContent(children)}
       </button>
     )
   }

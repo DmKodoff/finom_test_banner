@@ -5,3 +5,4 @@ export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs))
 }
 
+export const isBrowser = typeof window !== 'undefined'

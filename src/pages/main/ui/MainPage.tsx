@@ -5,8 +5,16 @@ import { Button } from '@/shared/ui/Button'
 const MainPage = () => {
   const [isBannerOpen, setIsBannerOpen] = useState(true)
 
-  const handleToggleBanner = () => {
+  const handleBannerToggle = () => {
     setIsBannerOpen((value) => !value)
+  }
+
+  const handleBannerClose = () => {
+    setIsBannerOpen(false)
+  }
+
+  const handleBannerApply = () => {
+    console.log('Application submitted')
   }
 
   return (
@@ -18,12 +26,16 @@ const MainPage = () => {
           This is the main page. The banner will appear as a modal overlay.
         </p>
 
-        <Button onClick={handleToggleBanner} variant='primary'>
+        <Button onClick={handleBannerToggle} variant='primary'>
           Show Modal Banner
         </Button>
       </div>
 
-      <Banner isOpen={isBannerOpen} onClose={handleToggleBanner} />
+      <Banner
+        isOpen={isBannerOpen}
+        onClose={handleBannerClose}
+        onApply={handleBannerApply}
+      />
     </div>
   )
 }

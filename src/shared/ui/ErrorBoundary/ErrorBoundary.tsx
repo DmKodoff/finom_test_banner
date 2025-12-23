@@ -1,9 +1,10 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { Component, ErrorInfo, ReactNode } from 'react'
 import { Button } from '@/shared/ui/Button'
 
 interface ErrorBoundaryProps {
   children: ReactNode
   fallback?: ReactNode
+  onError?: (error: Error, errorInfo: ErrorInfo) => void
 }
 
 interface ErrorBoundaryState {
@@ -23,17 +24,31 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     }
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return {
       hasError: true,
-      error,
+      error: error instanceof Error ? error : new Error(String(error)),
     }
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to console in development
+  componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
+    const errorMessage =
+      error instanceof Error ? error : new Error(String(error))
+
     if (import.meta.env.DEV) {
-      console.error('ErrorBoundary caught an error:', error, errorInfo)
+      console.error('ErrorBoundary caught an error:', errorMessage, errorInfo)
+    }
+
+    if (!import.meta.env.DEV) {
+      console.error('Production error:', {
+        message: errorMessage.message,
+        stack: errorMessage.stack,
+        componentStack: errorInfo.componentStack,
+      })
+    }
+
+    if (this.props.onError) {
+      this.props.onError(errorMessage, errorInfo)
     }
   }
 
@@ -73,4 +88,3 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 }
 
 export default ErrorBoundary
-

@@ -6,26 +6,50 @@ import { cn } from '@/shared/lib/utils'
  * @property as - HTML element to render (p, span, div). Default: 'p'
  * @property variant - Text color variant (default, light). Default: 'default'
  */
-export interface TextProps extends React.HTMLAttributes<HTMLParagraphElement> {
+export interface TextProps extends React.HTMLAttributes<HTMLElement> {
   as?: 'p' | 'span' | 'div'
   variant?: 'default' | 'light'
 }
 
-const Text = React.forwardRef<HTMLParagraphElement, TextProps>(
-  ({ className, as: Component = 'p', variant = 'default', ...props }, ref) => {
+const Text = React.forwardRef<
+  HTMLParagraphElement | HTMLSpanElement | HTMLDivElement,
+  TextProps
+>(({ className, as: Component = 'p', variant = 'default', ...props }, ref) => {
+  const baseClassName = cn(
+    'text-base font-normal leading-6',
+    variant === 'default' ? 'text-text-default' : 'text-text-light',
+    className
+  )
+
+  if (Component === 'span') {
     return (
-      <Component
-        ref={ref}
-        className={cn(
-          'text-base font-normal leading-6',
-          variant === 'default' ? 'text-text-default' : 'text-text-light',
-          className
-        )}
-        {...props}
+      <span
+        ref={ref as React.ForwardedRef<HTMLSpanElement>}
+        className={baseClassName}
+        {...(props as React.HTMLAttributes<HTMLSpanElement>)}
       />
     )
   }
-)
+
+  if (Component === 'div') {
+    return (
+      <div
+        ref={ref as React.ForwardedRef<HTMLDivElement>}
+        className={baseClassName}
+        {...(props as React.HTMLAttributes<HTMLDivElement>)}
+      />
+    )
+  }
+
+  return (
+    <p
+      ref={ref as React.ForwardedRef<HTMLParagraphElement>}
+      className={baseClassName}
+      {...(props as React.HTMLAttributes<HTMLParagraphElement>)}
+    />
+  )
+})
+
 Text.displayName = 'Text'
 
 export { Text }
